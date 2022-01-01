@@ -10,16 +10,9 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import {
-  genRandomCollections,
-  genRandomProject,
-  genRandomTasks,
   getEmptyTask,
   getTaskDisplay,
   getTasks,
-  Project,
-  sampleInitialColl,
-  sampleInitialTasks,
-  TaskCollection,
   WorkTask,
   WorkTaskDisplay,
 } from "./DataStructures";
@@ -27,8 +20,14 @@ import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
 import IconButton from "@mui/material/IconButton";
 import TaskListDialog from "./TaskListDialog";
 import TaskDialog from "./TaskDialog";
-import ActionsMenu from "./ActionsMenu";
-import ArrowRightSharpIcon from "@mui/icons-material/ArrowRightSharp";
+import {
+  DataGrid,
+  GridColDef,
+  GridRenderCellParams,
+  GridValueFormatterParams,
+  GridValueGetterParams,
+} from "@mui/x-data-grid";
+import { renderCellExpand } from "./renderCellExpand";
 
 // const randomTask = genRandomTasks(5);
 // const collection: TaskCollection = genRandomCollections(
@@ -40,7 +39,7 @@ import ArrowRightSharpIcon from "@mui/icons-material/ArrowRightSharp";
 // const tasks: WorkTask[] = sampleInitialTasks;
 const initialTask = getEmptyTask();
 
-export default function TaskList(props: any) {
+export default function TaskGrid(props: any) {
   const [openDialog, setOpenDialog] = React.useState(false);
   // const [taskDialog, setTaskDialog] = React.useState(initialTask);
   const [taskListDialog, setTaskListDialog] = React.useState([initialTask]);
@@ -67,9 +66,10 @@ export default function TaskList(props: any) {
     setDialogData(data);
   };
 
-  const toggleChildItems = (rowid: number, tasklist?: string[]) => {
+  const toggleChildItems = (taskid: number, tasklist?: string[]) => {
     let tRows: WorkTaskDisplay[] = Array.from(rows);
-    if (tasklist) {
+    let rowid = tRows.findIndex((tr) => tr.id == taskid);
+    if (tasklist && rowid > -1) {
       if (!tRows[rowid].showChild) {
         // Dialog is closed, going to open - expand tasks into subtasks
         // console.log("About to add child:" + JSON.stringify(tasklist));
@@ -93,82 +93,111 @@ export default function TaskList(props: any) {
     }
   };
 
-  React.useEffect(() => {
-    // setDialogData({ data: "Added" });
-  }, [rows]);
+  const columns: GridColDef[] = [
+    {
+      field: "subtasks",
+      headerName: "Sub Tasks",
+      width: 20,
+      renderCell: (params: GridRenderCellParams<[number, string[]]>) => {
+        let ind: number = params.value[0];
+        let tasklist: string[] = params.value[1];
+        if (tasklist.length > 0) {
+          return (
+            <div>
+              <IconButton
+                color="primary"
+                aria-label="upload picture"
+                component="span"
+                onClick={() => {
+                  toggleChildItems(ind, tasklist);
+                }}
+                size="small"
+              >
+                <AccountTreeOutlinedIcon fontSize="inherit" />
+              </IconButton>
+            </div>
+          );
+        } else {
+          return <div></div>;
+        }
+      },
+      valueGetter: (params: GridValueGetterParams) => [
+        params.row.id,
+        params.row.taskList,
+      ],
+    },
+    { field: "taskId", headerName: "ID", width: 50 },
+    {
+      field: "task",
+      headerName: "Task",
+      width: 200,
+      editable: true,
+      renderCell: renderCellExpand,
+    },
+    {
+      field: "actionBy",
+      headerName: "Action By",
+      width: 100,
+      editable: true,
+    },
+    {
+      field: "targetDate",
+      headerName: "Target Date",
+      width: 100,
+      editable: true,
+    },
+    {
+      field: "percComplete",
+      headerName: "% Complete",
+      type: "number",
+      width: 100,
+      editable: true,
+      valueFormatter: (params: GridValueFormatterParams) => {
+        const valueFormatted = Number(
+          (params.value as number) * 100
+        ).toLocaleString();
+        return `${valueFormatted} %`;
+      },
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      type: "singleSelect",
+      valueOptions: ["OPEN", "ASSIGNED", "PENDING", "SUBMITTED", "APPROVED"],
+      width: 150,
+      editable: true,
+    },
+    {
+      field: "remarks",
+      headerName: "Remarks",
+      width: 250,
+      editable: true,
+      renderCell: renderCellExpand,
+    },
+    {
+      field: "joined",
+      headerName: "Joined",
+      description: "This column has a value getter and is not sortable.",
+      sortable: false,
+      width: 360,
+      valueGetter: (params: GridValueGetterParams) =>
+        `${params.row.actionBy || "-"} ${params.row.task || ""}`,
+    },
+  ];
 
   return (
-    <TableContainer component={Paper}>
-      <TaskListDialog
-        open={openDialog}
-        handleAction={handleDialogAction}
-        taskList={taskListDialog}
-        parent={parentDialog}
-      />
-      <Stack>
-        <Box
-          sx={{
-            display: "flex",
-            padding: 0.5,
-          }}
-        >
-          <Typography variant="subtitle2" gutterBottom component="div">
-            Task List {JSON.stringify(dialogData)}
-          </Typography>
-        </Box>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell> </TableCell>
-              <TableCell>ID</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Action By</TableCell>
-              <TableCell>Target Date</TableCell>
-              <TableCell>% Complete</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Remarks</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row, index) => (
-              <TableRow
-                key={row.id}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell>
-                  {row.taskList && row.taskList.length > 0 ? (
-                    <IconButton
-                      color="primary"
-                      aria-label="upload picture"
-                      component="span"
-                      onClick={() => {
-                        toggleChildItems(index, row.taskList);
-                      }}
-                      size="small"
-                    >
-                      <AccountTreeOutlinedIcon fontSize="inherit" />
-                    </IconButton>
-                  ) : (
-                    <ActionsMenu />
-                  )}
-                </TableCell>
-                <TableCell>[{row.taskId}]</TableCell>
-                <TableCell>
-                  {Array.from(row.childTabs || "").map((str, sid) => (
-                    <ArrowRightSharpIcon key={sid} fontSize="medium" />
-                  ))}
-                  {row.task}
-                </TableCell>
-                <TableCell>{row.actionBy}</TableCell>
-                <TableCell>{row.targetDate}</TableCell>
-                <TableCell>{row.percComplete}</TableCell>
-                <TableCell>{row.status}</TableCell>
-                <TableCell>{row.remarks}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Stack>
-    </TableContainer>
+    <div style={{ display: "flex", height: "100%" }}>
+      <div style={{ flexGrow: 1 }}>
+        <DataGrid
+          autoHeight
+          rows={rows}
+          columns={columns}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          // checkboxSelection
+          disableSelectionOnClick
+        />
+      </div>
+    </div>
   );
 }

@@ -8,7 +8,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import { getEmptyTask, WorkTask } from "./DataStructures";
+import { getEmptyTask, sampleInitialTasks, WorkTask } from "./DataStructures";
 import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
@@ -18,13 +18,16 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
+import TaskList from "./TaskList";
 
 export default function TaskListDialog(props: any) {
-  const initialTask = getEmptyTask();
+  // const initialTask = getEmptyTask();
   const [open, setOpen] = React.useState(false);
-  const [task, setTask] = React.useState(initialTask);
+  const [taskList, setTaskList] = React.useState(props.taskList as WorkTask[]);
+  const [parent, setParent] = React.useState(props.parent as WorkTask);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+
   //   if (props) {
   //     console.log("Received Flag:" + props.open);
   //     setOpen(props.open);
@@ -43,9 +46,10 @@ export default function TaskListDialog(props: any) {
     // console.log("about to check props:" + props.open);
     if (props) {
       setOpen(props.open);
-      setTask(props.task);
+      setTaskList(props.taskList);
+      setParent(props.parent);
     }
-  }, [props.open, props.task]);
+  }, [props.open, props.taskList,props.parent]);
 
   return (
     <div>
@@ -56,66 +60,10 @@ export default function TaskListDialog(props: any) {
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          Task Details : {task.desc}
+          Parent Task: {parent.task}
         </DialogTitle>
         <DialogContent>
-          <TableContainer component={Paper}>
-            <Stack>
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableBody>
-                  <TableRow
-                    key="id"
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell>Id:</TableCell>
-                    <TableCell>{task.id}</TableCell>
-                  </TableRow>
-                  <TableRow
-                    key="desc"
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell>Description:</TableCell>
-                    <TableCell>{task.desc}</TableCell>
-                  </TableRow>
-                  <TableRow
-                    key="actionBy"
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell>Action By:</TableCell>
-                    <TableCell>{task.actionBy}</TableCell>
-                  </TableRow>
-                  <TableRow
-                    key="targetDate"
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell>Target Date:</TableCell>
-                    <TableCell>{task.targetDate}</TableCell>
-                  </TableRow>
-                  <TableRow
-                    key="percComplete"
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell>% Complete:</TableCell>
-                    <TableCell>{task.percComplete}</TableCell>
-                  </TableRow>
-                  <TableRow
-                    key="status"
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell>Status:</TableCell>
-                    <TableCell>{task.status}</TableCell>
-                  </TableRow>
-                  <TableRow
-                    key="remarks"
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell>Remarks:</TableCell>
-                    <TableCell>{task.remarks}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </Stack>
-          </TableContainer>
+        <TaskList tasks={taskList} />
         </DialogContent>
         <DialogActions>
           {/* <Button autoFocus onClick={handleClose}>

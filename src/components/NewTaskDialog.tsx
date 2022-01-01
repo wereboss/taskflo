@@ -20,7 +20,7 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 
 export default function NewTaskDialog(props: any) {
-  const initialTask = getEmptyTask();
+  const initialTask: WorkTask = getEmptyTask();
   const [open, setOpen] = React.useState(false);
   const [task, setTask] = React.useState(initialTask);
   const theme = useTheme();
@@ -39,14 +39,14 @@ export default function NewTaskDialog(props: any) {
     setOpen(false);
   };
   const handleCancel = () => {
-    props.handleNewItem(false,false, {});
+    props.handleNewItem(false, false, {});
     setOpen(false);
   };
   const handleSave = () => {
-    props.handleNewItem(false,true, {});
+    props.handleNewItem(false, true, {});
     setOpen(false);
   };
-  
+
   React.useEffect(() => {
     // console.log("about to check props:" + props.open);
     if (props) {
@@ -64,7 +64,7 @@ export default function NewTaskDialog(props: any) {
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          Task Details : {task.desc}
+          Task Details : {task.task}
         </DialogTitle>
         <DialogContent>
           <TableContainer component={Paper}>
@@ -83,7 +83,7 @@ export default function NewTaskDialog(props: any) {
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
                     <TableCell>Description:</TableCell>
-                    <TableCell>{task.desc}</TableCell>
+                    <TableCell>{task.task}</TableCell>
                   </TableRow>
                   <TableRow
                     key="actionBy"
@@ -129,7 +129,7 @@ export default function NewTaskDialog(props: any) {
           <Button autoFocus onClick={handleCancel}>
             Cancel
           </Button>
-          
+
           <Button onClick={handleSave} autoFocus>
             Save
           </Button>

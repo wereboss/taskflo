@@ -56,7 +56,7 @@ export default function TaskDialog(props: any) {
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          Task Details : {task.desc}
+          Task Details : {task.task}
         </DialogTitle>
         <DialogContent>
           <TableContainer component={Paper}>
@@ -75,7 +75,7 @@ export default function TaskDialog(props: any) {
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
                     <TableCell>Description:</TableCell>
-                    <TableCell>{task.desc}</TableCell>
+                    <TableCell>{task.task}</TableCell>
                   </TableRow>
                   <TableRow
                     key="actionBy"
