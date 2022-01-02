@@ -113,7 +113,7 @@ export default function TaskList(props: any) {
           }}
         >
           <Typography variant="subtitle2" gutterBottom component="div">
-            Task List {JSON.stringify(dialogData)}
+            Tasks List View: {JSON.stringify(dialogData)}
           </Typography>
         </Box>
         <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
